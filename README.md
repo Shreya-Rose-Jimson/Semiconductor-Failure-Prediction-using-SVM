@@ -16,150 +16,132 @@ The project demonstrates data preprocessing, handling missing values, class imba
 
 ## Introduction
 
-A **Support Vector Machine (SVM)** is a supervised machine learning algorithm primarily used for **classification** and **regression** tasks. It is particularly effective for high-dimensional datasets and aims to find the optimal decision boundary that separates different classes.
+Support Vector Machine (SVM) is a supervised machine learning algorithm used for both classification and regression tasks. It is most commonly used for classification problems and is particularly effective when dealing with high-dimensional data.
 
-In semiconductor failure prediction, SVM is used to classify manufacturing instances as either:
+The main objective of SVM is to find the optimal decision boundary that separates different classes while maximizing the distance between the boundary and the nearest data points from each class.
+
+In this project, SVM is used to classify semiconductor manufacturing instances as either:
 
 * **Pass (-1)**
 * **Fail (1)**
 
 ---
 
-## Core Concept
-
-The fundamental objective of SVM is to find the **best hyperplane** that separates data points belonging to different classes while maximizing the distance between the classes and the decision boundary.
-
-Unlike many classification algorithms, SVM focuses on creating the largest possible margin between classes, which improves the model's ability to generalize to unseen data.
-
----
-
 ## Hyperplane
 
-A **hyperplane** is the decision boundary that separates classes.
+A hyperplane is the decision boundary that separates classes in the feature space.
 
 For a two-dimensional dataset, the hyperplane can be represented as:
 
-[
-w_1x_1 + w_2x_2 + b = 0
-]
+```text
+w1x1 + w2x2 + b = 0
+```
 
 More generally:
 
-[
-w^T x + b = 0
-]
+```text
+wᵀx + b = 0
+```
 
 where:
 
-* (w) = weight vector
-* (x) = feature vector
-* (b) = bias term
+* `w` = weight vector
+* `x` = feature vector
+* `b` = bias term
 
-The hyperplane divides the feature space into two regions:
-
-[
-w^T x + b > 0
-]
-
-and
-
-[
-w^T x + b < 0
-]
+The hyperplane divides the feature space into regions corresponding to different classes.
 
 ---
 
 ## Margin
 
-The **margin** is the distance between the hyperplane and the nearest data points from each class.
+The margin is the distance between the hyperplane and the nearest data points from each class.
 
 SVM attempts to maximize this margin:
 
-[
-\text{Margin} = \frac{2}{||w||}
-]
+```text
+Margin = 2 / ||w||
+```
 
 A larger margin generally results in:
 
 * Better generalization
-* Improved robustness to noise
 * Reduced overfitting
+* Improved robustness to noise
 
 ---
 
 ## Support Vectors
 
-The data points closest to the hyperplane are known as **support vectors**.
+Support vectors are the data points that lie closest to the hyperplane.
 
-These points are critical because they determine the location and orientation of the decision boundary.
+These points are important because:
 
-Characteristics of support vectors:
+* They determine the position of the decision boundary.
+* They define the margin.
+* They have the greatest influence on the classification model.
 
-* Directly influence the hyperplane
-* Define the margin
-* Removal of non-support vectors often has little impact on the model
-
-The algorithm derives its name from these important observations.
+Unlike many machine learning algorithms, SVM relies primarily on these critical points rather than the entire dataset.
 
 ---
 
 ## Optimization Objective
 
-For linearly separable data, SVM solves the following optimization problem:
+For linearly separable data, SVM aims to:
 
-### Objective Function
+```text
+Minimize: (1/2) ||w||²
+```
 
-[
-\min \frac{1}{2} ||w||^2
-]
+Subject to:
 
-### Subject To
-
-[
-y_i(w^T x_i + b) \geq 1
-]
+```text
+yi(wᵀxi + b) ≥ 1
+```
 
 where:
 
-* (x_i) = feature vector
-* (y_i) = class label (+1 or -1)
+* `xi` = feature vector
+* `yi` = class label (+1 or -1)
 
-Minimizing (||w||^2) effectively maximizes the margin.
+Minimizing `||w||²` effectively maximizes the margin between classes.
 
 ---
 
 ## Soft Margin SVM
 
-Real-world datasets are rarely perfectly separable.
+Real-world datasets often contain noise and overlapping classes, making perfect separation impossible.
 
-To allow some classification errors, SVM introduces **slack variables** ((\xi_i)):
+To handle such situations, SVM introduces slack variables and a regularization parameter `C`.
 
-[
-\min \frac{1}{2} ||w||^2 + C \sum \xi_i
-]
+The optimization problem becomes:
+
+```text
+Minimize: (1/2) ||w||² + C Σξi
+```
 
 where:
 
-* (C) = regularization parameter
-* (\xi_i) = penalty for misclassified points
+* `C` = regularization parameter
+* `ξi` = penalty for misclassified points
 
-### Role of C
+### Effect of C
 
 #### Large C
 
-* Strong penalty for errors
+* Strong penalty for misclassification
 * Smaller margin
 * Lower training error
-* Greater risk of overfitting
+* Higher risk of overfitting
 
 #### Small C
 
-* Allows some misclassifications
+* Allows more classification errors
 * Larger margin
 * Better generalization
-* Higher bias
+* Lower risk of overfitting
 
-In this project, the parameter (C) is optimized using GridSearchCV.
+In this project, multiple values of `C` are tested using GridSearchCV.
 
 ---
 
@@ -167,133 +149,154 @@ In this project, the parameter (C) is optimized using GridSearchCV.
 
 Many datasets cannot be separated using a straight line or linear hyperplane.
 
-In such cases, SVM uses a technique known as the **Kernel Trick** to transform data into a higher-dimensional space where separation becomes possible.
+For example, if one class surrounds another, no linear boundary can perfectly separate them.
+
+To solve this problem, SVM uses the **Kernel Trick**.
 
 ---
 
 ## Kernel Trick
 
-The kernel trick enables SVM to perform complex nonlinear classification without explicitly computing higher-dimensional transformations.
+The kernel trick allows SVM to transform data into a higher-dimensional space where classes become separable.
 
-Instead, it calculates similarities between data points using kernel functions.
-
-### Common Kernel Functions
-
-#### Linear Kernel
-
-[
-K(x_i, x_j) = x_i^T x_j
-]
-
-Used when data is approximately linearly separable.
+Instead of explicitly performing the transformation, SVM computes similarities between data points using kernel functions.
 
 ---
 
-#### Polynomial Kernel
+## Common Kernel Functions
 
-[
-K(x_i, x_j) = (x_i^T x_j + c)^d
-]
+### Linear Kernel
+
+Used when the data is approximately linearly separable.
+
+```text
+K(xi, xj) = xiᵀxj
+```
+
+---
+
+### Polynomial Kernel
 
 Captures polynomial relationships between features.
 
+```text
+K(xi, xj) = (xiᵀxj + c)^d
+```
+
+where:
+
+* `c` = constant term
+* `d` = polynomial degree
+
 ---
 
-#### Radial Basis Function (RBF) Kernel
+### Radial Basis Function (RBF) Kernel
 
-[
-K(x_i, x_j) = e^{-\gamma ||x_i - x_j||^2}
-]
+The most commonly used kernel.
 
-The RBF kernel is the most widely used kernel and can model highly complex decision boundaries.
+```text
+K(xi, xj) = exp(-γ ||xi - xj||²)
+```
 
-This project uses the **RBF kernel** because semiconductor sensor data often exhibits nonlinear relationships.
+where:
+
+* `γ` (gamma) controls the influence of training examples.
+
+The RBF kernel can model highly complex nonlinear decision boundaries and is used in this project.
 
 ---
 
 ## Gamma Parameter
 
-The parameter (\gamma) controls the influence of individual training samples in the RBF kernel.
+Gamma (`γ`) determines how far the influence of a training example extends.
 
 ### Small Gamma
 
-* Produces smoother decision boundaries
-* Considers points farther away
+* Smooth decision boundary
+* Considers distant points
 * Lower variance
+* Better generalization
 
 ### Large Gamma
 
-* Produces more complex boundaries
+* Complex decision boundary
 * Focuses on nearby points
 * Higher variance
-* Greater risk of overfitting
+* Increased risk of overfitting
 
-In this project, multiple gamma values are evaluated using GridSearchCV.
+This project evaluates multiple gamma values during hyperparameter tuning.
 
 ---
 
 ## Importance of Feature Scaling
 
-SVM relies heavily on distance calculations.
+SVM relies on distance calculations, making feature scaling essential.
 
-Features with larger numerical ranges can dominate the learning process if scaling is not applied.
+Consider two features:
 
-To address this issue, features are standardized using:
+| Feature     | Range    |
+| ----------- | -------- |
+| Temperature | 0 – 1000 |
+| Pressure    | 0 – 1    |
 
-[
-z = \frac{x - \mu}{\sigma}
-]
+Without scaling, the temperature feature would dominate the distance calculations.
+
+To prevent this issue, features are standardized using:
+
+```text
+z = (x - μ) / σ
+```
 
 where:
 
-* (\mu) = feature mean
-* (\sigma) = feature standard deviation
+* `μ` = mean of the feature
+* `σ` = standard deviation of the feature
 
-This transformation ensures that all features contribute equally during training.
+In this project, StandardScaler is used to normalize all sensor measurements before training.
 
 ---
 
 ## Why SVM is Suitable for Semiconductor Failure Prediction
 
-The SECOM dataset possesses several characteristics that make SVM a strong choice:
+The SECOM dataset presents several challenges:
 
-* High-dimensional sensor measurements
-* Complex nonlinear relationships
-* Imbalanced failure occurrences
-* Relatively limited failure samples
+* High-dimensional sensor data
+* Nonlinear relationships between variables
+* Class imbalance
+* Limited failure samples
 
-Advantages of SVM in this context include:
+SVM is well-suited for these characteristics because it:
 
-* Effective handling of high-dimensional data
-* Strong generalization capability
-* Robust performance with nonlinear kernels
-* Ability to identify subtle patterns in sensor readings
+* Performs effectively in high-dimensional spaces
+* Handles nonlinear patterns using kernels
+* Provides strong generalization performance
+* Works well when the number of features is large
 
 ---
 
 ## Advantages of SVM
 
-* Effective in high-dimensional spaces
+* Effective in high-dimensional datasets
 * Strong theoretical foundation
-* Good generalization performance
-* Works well with nonlinear decision boundaries
-* Memory efficient due to reliance on support vectors
+* Good generalization capability
+* Supports nonlinear classification through kernels
+* Uses only support vectors to define decision boundaries
 
 ---
 
 ## Limitations of SVM
 
 * Computationally expensive for large datasets
-* Sensitive to hyperparameter selection
+* Sensitive to hyperparameter tuning
 * Requires feature scaling
-* Less interpretable than tree-based models
+* Less interpretable than decision trees
 * Training time increases with dataset size
 
 ---
 
 ## Application in This Project
 
-The machine learning pipeline implemented in this project follows these steps:
+The workflow used in this semiconductor failure prediction project is:
 
 ```text
 SECOM Dataset
@@ -308,15 +311,14 @@ PCA / Feature Selection
       ↓
 SVM Training
       ↓
-Hyperparameter Optimization
+Hyperparameter Tuning
       ↓
-Performance Evaluation
+Model Evaluation
 ```
 
-The objective is to identify semiconductor manufacturing failures by learning an optimal decision boundary that maximizes the separation between pass and fail instances.
+The objective is to learn an optimal decision boundary that can accurately distinguish between successful and failed semiconductor manufacturing instances.
 
 ---
-
 
 
 
