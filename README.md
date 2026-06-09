@@ -1,5 +1,3 @@
-# Semiconductor-Failure-Prediction-using-SVM
-
 # Semiconductor Failure Prediction using SVM
 
 ## Overview
